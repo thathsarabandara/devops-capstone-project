@@ -33,6 +33,7 @@ class TestAccountService(TestCase):
         """Run once before all tests"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
+        talisman.force_https = False
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         init_db(app)
@@ -51,11 +52,6 @@ class TestAccountService(TestCase):
     def tearDown(self):
         """Runs once after each test case"""
         db.session.remove()
-
-    @classmethod
-    def setUpClass(cls):
-        """Run once before all tests"""
-        talisman.force_https = False
 
     ######################################################################
     #  H E L P E R   M E T H O D S
