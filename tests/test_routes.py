@@ -22,6 +22,7 @@ BASE_URL = "/accounts"
 
 HTTPS_ENVIRON = {'wsgi.url_scheme': 'https'}
 
+
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
@@ -46,7 +47,6 @@ class TestAccountService(TestCase):
         """Runs before each test"""
         db.session.query(Account).delete()  # clean up the last tests
         db.session.commit()
-
         self.client = app.test_client()
 
     def tearDown(self):
@@ -56,7 +56,6 @@ class TestAccountService(TestCase):
     ######################################################################
     #  H E L P E R   M E T H O D S
     ######################################################################
-
     def _create_accounts(self, count):
         """Factory method to create accounts in bulk"""
         accounts = []
@@ -76,7 +75,6 @@ class TestAccountService(TestCase):
     ######################################################################
     #  A C C O U N T   T E S T   C A S E S
     ######################################################################
-
     def test_index(self):
         """It should get 200_OK from the Home Page"""
         response = self.client.get("/")
@@ -126,7 +124,6 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # ADD YOUR TEST CASES HERE ...
     def test_security_headers(self):
         """It should return security headers"""
         response = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
@@ -134,24 +131,29 @@ class TestAccountService(TestCase):
         headers = {
             'X-Frame-Options': 'SAMEORIGIN',
             'X-Content-Type-Options': 'nosniff',
-            'Content-Security-Policy': 'default-src \'self\'; object-src \'none\'',
+            'Content-Security-Policy': "default-src 'self'; object-src 'none'",
             'Referrer-Policy': 'strict-origin-when-cross-origin'
         }
         for key, value in headers.items():
             self.assertEqual(response.headers.get(key), value)
 
     def test_get_account(self):
+        """It should read an account"""
         account = self._create_accounts(1)[0]
-        resp = self.client.get(f"{BASE_URL}/{account.id}", content_type="application/json")
+        resp = self.client.get(
+            f"{BASE_URL}/{account.id}", content_type="application/json"
+        )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], account.name)
 
     def test_get_account_not_found(self):
+        """It should return 404 if account not found"""
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_account(self):
+        """It should Update an existing account"""
         test_account = AccountFactory()
         resp = self.client.post(BASE_URL, json=test_account.serialize())
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -164,13 +166,17 @@ class TestAccountService(TestCase):
         self.assertEqual(updated_account["name"], "Thathsara")
 
     def test_delete_account(self):
+        """It should Delete an account"""
         account = self._create_accounts(1)[0]
-        resp = self.client.delete(f"{BASE_URL}/{account.id}", json=account.serialize())
-        self.assertEqual(resp.status_code,status.HTTP_204_NO_CONTENT)
+        resp = self.client.delete(
+            f"{BASE_URL}/{account.id}", json=account.serialize()
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_account_list(self):
+        """It should return a list of accounts"""
         self._create_accounts(5)
         resp = self.client.get(BASE_URL)
-        self.assertEqual(resp.status_code,status.HTTP_200_OK)
-        data=resp.get_json()
-        self.assertEqual(len(data),5)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
