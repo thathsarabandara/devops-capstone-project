@@ -66,7 +66,7 @@ spec:
       runAfter:
         - clone
 
-    - name: build-image
+    - name: build
       workspaces:
         - name: source
           workspace: pipeline-workspace
