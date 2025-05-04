@@ -12,6 +12,7 @@ spec:
   workspaces:
     - name: pipeline-workspace
   params:
+    - name: build-image
     - name: repo-url
     - name: branch
       default: main
@@ -64,3 +65,16 @@ spec:
         value: "-v --with-spec --spec-color"
       runAfter:
         - clone
+    - name: build-image
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+        - name: IMAGE
+          value: "$(params.build-image)"
+      runAfter:
+        - tests
+        - lint
