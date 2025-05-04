@@ -18,7 +18,7 @@ spec:
         app: accounts
     spec:
       containers:
-      - image: IMAGE_NAME_HERE
+      - image: thathsara
         name: accounts
         resources: {}
 
